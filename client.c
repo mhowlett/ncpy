@@ -127,9 +127,15 @@ int execute_client(char* a)
 
     send_cmd(socket, COMMAND_GETCHUNK, i);
     rc = -1;
-    while (rc < 1)
+    while (rc < 0)
     {
       rc = recv_cmd_chunk(socket, i, chunkbuf);
+      if (rc < 0)
+      {
+	nn_close(socket);
+	socket = nn_socket(AF_SP, NN_PAIR);
+	endpoint = nn_connect(socket, addr);
+      }
     }
 
     memcpy(data + CHUNK_SIZE*i, chunkbuf, rc);

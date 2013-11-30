@@ -47,9 +47,14 @@ int recv_cmd_int(int socket, char command, int* data)
   return 0;
 }
 
+int recv_cmd_chunk(int socket, char** data)
+{
+  
+}
+
 int get_filename_and_numchunks(int socket, char** filename, int* maxchunk)
 {
-  // not robust against network outages.
+  // this part is not robust against network outages.
 
   send_cmd(socket, COMMAND_FILENAME, 0);
   recv_cmd_string(socket, COMMAND_FILENAME, filename);
@@ -65,12 +70,10 @@ int execute_client(char* a)
   int rc;
   char addr[1024];
 
-  char commandbuf[sizeof(int) + 1];
   char chunkbuf[CHUNK_SIZE];
   
   sprintf(addr, "tcp://%s:%d", a, PORT);
 
-  int timeout_ms = 1000;
   socket = nn_socket(AF_SP, NN_PAIR);
   endpoint = nn_connect(socket, addr);
 
@@ -81,6 +84,7 @@ int execute_client(char* a)
   int bufsize = CHUNK_SIZE*(maxchunk+1);
   char *data = (char *)malloc(bufsize);
 
+  int timeout_ms = 1000;
   nn_setsockopt(socket, NN_SOL_SOCKET, NN_RCVTIMEO, &timeout_ms, sizeof(int));
   nn_setsockopt(socket, NN_SOL_SOCKET, NN_SNDTIMEO, &timeout_ms, sizeof(int));
 
@@ -91,9 +95,7 @@ int execute_client(char* a)
     printf("receiving chunk %d/%d", i+1, maxchunk+1);
     fflush(stdout);
 
-    commandbuf[0] = COMMAND_GETCHUNK;
-    *((int *)(commandbuf+1)) = i;
-    nn_send(socket, commandbuf, sizeof(int) + 1, 0);
+    send_cmd(socket, COMMAND_GETCHUNK, i);
 
     rc = nn_recv(socket, chunkbuf, CHUNK_SIZE, 0);
     if (rc < 0)
@@ -105,8 +107,7 @@ int execute_client(char* a)
     memcpy(data + CHUNK_SIZE*i, chunkbuf, rc);
   }
 
-  commandbuf[0] = COMMAND_FINISHED;
-  nn_send(socket, commandbuf, sizeof(int) + 1, 0);
+  send_cmd(socket, COMMAND_FINISHED, 0);
 
   int size = rc + maxchunk*CHUNK_SIZE;
   rc = writefile(filename, data, size);

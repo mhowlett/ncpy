@@ -2,7 +2,7 @@
 #define NCPY_H
 
 #include <nn.h>
-#include <pair.h>
+#include <reqrep.h>
 #include <stdio.h>
 
 // todo: allow chunk size and port to be specified on comand line.

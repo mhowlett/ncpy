@@ -104,7 +104,7 @@ int execute_client(char* a)
   
   sprintf(addr, "tcp://%s:%d", a, PORT);
 
-  socket = nn_socket(AF_SP, NN_PAIR);
+  socket = nn_socket(AF_SP, NN_REQ);
   endpoint = nn_connect(socket, addr);
 
   char* filename;
@@ -132,9 +132,17 @@ int execute_client(char* a)
       rc = recv_cmd_chunk(socket, i, chunkbuf);
       if (rc < 0)
       {
+	printf("shutting down endpoint\n");
+	nn_shutdown(socket, endpoint);
+	printf("closing socket\n");
 	nn_close(socket);
-	socket = nn_socket(AF_SP, NN_PAIR);
+	printf("reopening socket %s\n", addr);
+	socket = nn_socket(AF_SP, NN_REQ);
+	printf("connecting socket\n");
 	endpoint = nn_connect(socket, addr);
+        nn_setsockopt(socket, NN_SOL_SOCKET, NN_RCVTIMEO, &timeout_ms, sizeof(int));
+        nn_setsockopt(socket, NN_SOL_SOCKET, NN_SNDTIMEO, &timeout_ms, sizeof(int));
+
       }
     }
 

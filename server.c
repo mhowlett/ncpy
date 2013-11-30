@@ -20,7 +20,7 @@ int execute_server(int port, char* path)
   sprintf(addr, "tcp://*:%d", port);
 
   int timeout_ms = 10000;
-  socket = nn_socket(AF_SP, NN_PAIR);
+  socket = nn_socket(AF_SP, NN_REP);
   endpoint = nn_bind(socket, addr);
   nn_setsockopt(socket, NN_SOL_SOCKET, NN_RCVTIMEO, &timeout_ms, sizeof(int));
   nn_setsockopt(socket, NN_SOL_SOCKET, NN_SNDTIMEO, &timeout_ms, sizeof(int));

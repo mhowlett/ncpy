@@ -7,11 +7,12 @@ NANOMSG_LIB_PATH=/usr/local/lib
 
 all: ncpy
 
-ncpy: ncpy.o
+ncpy: objs
 	gcc -o ncpy ncpy.o -lnanomsg
 
-ncpy.o: ncpy.c
+objs: ncpy.c io.c io.h
 	gcc -I$(NANOMSG_PATH) -w -c ncpy.c
+	gcc -w -c io.c
 
 clean:
 	rm -rf *.o

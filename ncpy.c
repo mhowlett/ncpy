@@ -56,7 +56,7 @@ int writefile(const char *path, char *bytes, int size)
 
 void erase_line()
 {
-  printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
+  printf("\r                                                              ");
 }
 
 int execute_client(char* a)

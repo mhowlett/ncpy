@@ -10,10 +10,11 @@
 
 int display_usage()
 {
-  printf("ncpy -c address\n");
-  printf("ncpy -s filename\n");
+  printf("ncpy -c ADDRESS\n");
+  printf("ncpy -s FILENAME\n");
   return 1;
 }
+
 
 int main(int argc, char* argv[])
 {

@@ -54,6 +54,11 @@ int writefile(const char *path, char *bytes, int size)
   return 0;
 }
 
+void erase_line()
+{
+  printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
+}
+
 int execute_client(char* a)
 {
   int socket;
@@ -83,12 +88,12 @@ int execute_client(char* a)
   int bufsize = CHUNK_SIZE*(maxchunk+1);
   char *data = (char *)malloc(bufsize);
 
-  printf ("chunks to get: %d\n", maxchunk);
-
   int i;
-  for (i =0; i<=maxchunk; ++i)
+  for (i=0; i<=maxchunk; ++i)
   {
-    printf("getting chunk #%d\n", i);
+    erase_line();
+    printf("receiving chunk %d/%d", i+1, maxchunk+1);
+    fflush(stdout);
 
     commandbuf[0] = COMMAND_GETCHUNK;
     *((int *)(commandbuf+1)) = i;
@@ -107,8 +112,12 @@ int execute_client(char* a)
   commandbuf[0] = COMMAND_FINISHED;
   nn_send(socket, commandbuf, sizeof(int) + 1, 0);
 
+
   int size = rc + maxchunk*CHUNK_SIZE;
   rc = writefile(filename, data, size);
+
+  erase_line();
+  printf ("%s: receive complete\n", filename);
 
   nn_freemsg(filename);
 
@@ -124,14 +133,11 @@ int execute_server(int port, char* path)
   char cmdbuf[5];
   char addr[1024];
 
+  int maxchunk;
   char* data;
   int size = readfile(path, &data);
-  if (size < 0)
-  {
-    return 1;
-  }
-
-  printf("file #bytes: %d\n", size);
+  if (size < 0) return 1;
+  maxchunk = size/CHUNK_SIZE + ((size % CHUNK_SIZE == 0) ? -1 : 0);
 
   sprintf(addr, "tcp://*:%d", port);
   socket = nn_socket(AF_SP, NN_REP);
@@ -140,7 +146,7 @@ int execute_server(int port, char* path)
   int idlecnt = 0;
   while (idlecnt < 10000)
   {
-    rc =  nn_recv(socket, cmdbuf, 5, NN_DONTWAIT);
+    rc = nn_recv(socket, cmdbuf, 5, NN_DONTWAIT);
 
     if (rc <= 0)
     {
@@ -158,7 +164,8 @@ int execute_server(int port, char* path)
     
     if (cmdbuf[0] == COMMAND_FINISHED)
     {
-      printf("transfer completed.\n");
+      erase_line();
+      printf("%s: send complete\n", path);
       break;
     }
 
@@ -170,7 +177,7 @@ int execute_server(int port, char* path)
 
     if (cmdbuf[0] == COMMAND_GETMAXCHUNK)
     {
-      *((int *)cmdbuf) = size/CHUNK_SIZE + ((size % CHUNK_SIZE == 0) ? -1 : 0);
+      *((int *)cmdbuf) = maxchunk;
       nn_send(socket, cmdbuf, sizeof(int), 0);
       continue;
     }
@@ -178,9 +185,11 @@ int execute_server(int port, char* path)
     if (cmdbuf[0] == COMMAND_GETCHUNK)
     {
       int id = *((int *)(cmdbuf+1));
-      int len = (id == size / CHUNK_SIZE) ? size % CHUNK_SIZE : CHUNK_SIZE;
-      printf("%d : %d\n", id, len);
-      nn_send(socket, data + id * CHUNK_SIZE, len, 0);
+      int chunklen = (id == size/CHUNK_SIZE) ? size % CHUNK_SIZE : CHUNK_SIZE;
+      erase_line();
+      printf("sending chunk: %d/%d", id+1, maxchunk+1);
+      fflush(stdout);
+      nn_send(socket, data + id * CHUNK_SIZE, chunklen, 0);
       continue;
     }
 

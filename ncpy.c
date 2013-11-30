@@ -5,12 +5,13 @@
 #define COMMAND_FINISHED 0
 #define COMMAND_GETCHUNK 1
 #define COMMAND_GETMAXCHUNK 2
+#define COMMAND_FILENAME 3
 
 #define CHUNK_SIZE 128
 
 #define PORT "9005"
 
-int load(const char *filename, char **result) 
+int readfile(const char *filename, char **result) 
 { 
   int size = 0;
   FILE *f = fopen(filename, "rb");
@@ -35,7 +36,7 @@ int load(const char *filename, char **result)
   return size;
 }
 
-int save(const char *filename, char *bytes, int size)
+int writefile(const char *filename, char *bytes, int size)
 {
   FILE *f = fopen(filename, "wb");
   int fd = fileno(f);
@@ -65,9 +66,14 @@ int execute_client(char* a)
   socket = nn_socket(AF_SP, NN_REQ);
   endpoint = nn_connect(socket, addr);
 
+  buf[0] = COMMAND_FILENAME;
+  nn_send(socket, buf, sizeof(int) + 1, 0);
+  
+
   buf[0] = COMMAND_GETMAXCHUNK;
   nn_send(socket, buf, sizeof(int) + 1, 0);
   int rc = nn_recv(socket, buf, CHUNK_SIZE, 0);
+  
   int maxchunk = *((int *)buf);
   int bufsize = CHUNK_SIZE*(maxchunk+1);
   char *bytes = (char *)malloc(bufsize);
@@ -98,7 +104,7 @@ int execute_client(char* a)
   nn_send(socket, buf, sizeof(int) + 1, 0);
 
   int size = rc + maxchunk*CHUNK_SIZE;
-  return save("out.bin", bytes, size);
+  return writefile("out.bin", bytes, size);
 }
 
 int execute_server(char* port, char* path)
@@ -109,7 +115,7 @@ int execute_server(char* port, char* path)
   int endpoint;
 
   char* bytes;
-  int size = load(path, &bytes);
+  int size =readfile(path, &bytes);
   if (size < 0)
   {
     return 1;

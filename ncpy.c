@@ -112,7 +112,6 @@ int execute_client(char* a)
   commandbuf[0] = COMMAND_FINISHED;
   nn_send(socket, commandbuf, sizeof(int) + 1, 0);
 
-
   int size = rc + maxchunk*CHUNK_SIZE;
   rc = writefile(filename, data, size);
 
@@ -208,8 +207,8 @@ int execute_server(int port, char* path)
 
 int display_usage()
 {
-  printf("ncpy -c sourceaddress\n");
-  printf("ncpy -s port filepath\n");
+  printf("ncpy -c address\n");
+  printf("ncpy -s filename\n");
   return 1;
 }
 

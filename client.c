@@ -58,22 +58,19 @@ int recv_cmd_chunk(int socket, int i, char* data)
   rc = nn_recv(socket, buf, buflen, 0);
   if (rc < 0)
   {
-    printf("network error\n");
     return -1;
   }
   int receivedlen = rc;
 
   if (buf[0] != COMMAND_GETCHUNK)
   {
-    printf("network error: receiving chunk #%d", i);
-    return -1;
+    return -2;
   }
 
   int goti = *((int *)(buf+1));
   if (goti != i)
   {
-    printf("network error: unexpected chunk. got %d. expected %d.", goti, i);
-    return -1;
+    return -3;
   }
 
   int chunklen = receivedlen - headerlen;
@@ -127,26 +124,30 @@ int execute_client(char* a)
 
     send_cmd(socket, COMMAND_GETCHUNK, i);
     rc = -1;
+    int errorcount = 0;
     while (rc < 0)
     {
       rc = recv_cmd_chunk(socket, i, chunkbuf);
       if (rc < 0)
       {
-	printf("shutting down endpoint\n");
-	nn_shutdown(socket, endpoint);
-	printf("closing socket\n");
-	nn_close(socket);
-	printf("reopening socket %s\n", addr);
-	socket = nn_socket(AF_SP, NN_REQ);
-	printf("connecting socket\n");
-	endpoint = nn_connect(socket, addr);
-        nn_setsockopt(socket, NN_SOL_SOCKET, NN_RCVTIMEO, &timeout_ms, sizeof(int));
-        nn_setsockopt(socket, NN_SOL_SOCKET, NN_SNDTIMEO, &timeout_ms, sizeof(int));
+	errorcount += 1;
+	erase_line();
+	printf("receiving chunk %d/%d [recv error x%d]", i+1, maxchunk+1, errorcount);
+	fflush(stdout);
 
+	nn_close(socket);
+	nn_socket(AF_SP, NN_REQ);
+	nn_connect(socket, addr);
+        nn_setsockopt(socket, NN_SOL_SOCKET, NN_RCVTIMEO, &timeout_ms, sizeof(int));
+        nn_setsockopt(socket, NN_SOL_SOCKET, NN_SNDTIMEO, &timeout_ms, sizeof(int));	
+        send_cmd(socket, COMMAND_GETCHUNK, i);
       }
     }
 
-    memcpy(data + CHUNK_SIZE*i, chunkbuf, rc);
+    if (rc > 0)
+    {
+      memcpy(data + CHUNK_SIZE*i, chunkbuf, rc);
+    }
   }
 
   send_cmd(socket, COMMAND_FINISHED, 0);

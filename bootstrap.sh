@@ -8,21 +8,15 @@ if [ ! -d /opt ]
     apt-get update
 fi
 
-apt-get install -y mono-devel
-apt-get install -y mono-xbuild
 apt-get install -y g++
 apt-get install -y make
 apt-get install -y libtool
 apt-get install -y autoconf
 apt-get install -y automake
-apt-get install -y uuid-dev
 apt-get install -y git
 apt-get install -y unzip
-apt-get install -y libcurl-openssl-dev
-apt-get install -y libcurl4-openssl-dev
 apt-get install -y wget
 apt-get install -y screen
-apt-get install -y libc6-dev-i386
 
 if [ ! -d /opt ]
   then

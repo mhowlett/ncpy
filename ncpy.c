@@ -10,8 +10,8 @@
 
 int display_usage()
 {
-  printf("ncpy -r REMOTE_ADDRESS_TO_RECEIVE_FROM\n");
-  printf("ncpy -s PATH_OF_FILE_TO_SEND\n");
+  printf("ncpy -r REMOTE-ADDRESS-TO-RECEIVE-FROM\n");
+  printf("ncpy -s PATH-OF-FILE-TO-SEND\n");
   return 1;
 }
 

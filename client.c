@@ -111,8 +111,6 @@ int execute_client(char* a)
   int maxchunk;
   get_filename_and_numchunks(socket, &filename, &maxchunk);
 
-  printf("%d\n", maxchunk);
-
   int bufsize = CHUNK_SIZE*(maxchunk+1);
   char *data = (char *)malloc(bufsize);
 

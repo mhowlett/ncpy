@@ -19,14 +19,14 @@ int execute_server(int port, char* path)
 
   sprintf(addr, "tcp://*:%d", port);
 
-  int timeout_ms = 1000;
+  int timeout_ms = 10000;
   socket = nn_socket(AF_SP, NN_PAIR);
   endpoint = nn_bind(socket, addr);
-  //nn_setsockopt(socket, NN_SOL_SOCKET, NN_RCVTIMEO, &timeout_ms, sizeof(int));
-  //nn_setsockopt(socket, NN_SOL_SOCKET, NN_SNDTIMEO, &timeout_ms, sizeof(int));
+  nn_setsockopt(socket, NN_SOL_SOCKET, NN_RCVTIMEO, &timeout_ms, sizeof(int));
+  nn_setsockopt(socket, NN_SOL_SOCKET, NN_SNDTIMEO, &timeout_ms, sizeof(int));
 
   int idlecnt = 0;
-  while (idlecnt < 10000)
+  while (idlecnt < 100)
   {
     rc = nn_recv(socket, cmdbuf, COMMAND_ID_SIZE + sizeof(int), 0);
 

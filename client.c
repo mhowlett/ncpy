@@ -114,7 +114,7 @@ int execute_client(char* a)
   int bufsize = CHUNK_SIZE*(maxchunk+1);
   char *data = (char *)malloc(bufsize);
 
-  int timeout_ms = 1000;
+  int timeout_ms = 10000;
   nn_setsockopt(socket, NN_SOL_SOCKET, NN_RCVTIMEO, &timeout_ms, sizeof(int));
   nn_setsockopt(socket, NN_SOL_SOCKET, NN_SNDTIMEO, &timeout_ms, sizeof(int));
 
@@ -126,7 +126,11 @@ int execute_client(char* a)
     fflush(stdout);
 
     send_cmd(socket, COMMAND_GETCHUNK, i);
-    rc = recv_cmd_chunk(socket, i, chunkbuf);
+    rc = -1;
+    while (rc < 1)
+    {
+      rc = recv_cmd_chunk(socket, i, chunkbuf);
+    }
 
     memcpy(data + CHUNK_SIZE*i, chunkbuf, rc);
   }

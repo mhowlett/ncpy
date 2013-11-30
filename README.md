@@ -15,7 +15,7 @@ cafe and have the transfer seemlessly continue from where it left off.
 
 On the server
 
-    ncpy -s PATH-TO-FILE-TO-SEND
+    ncpy -s PATH-OF-FILE-TO-SEND
     
 On the client:
 
@@ -42,13 +42,15 @@ If you want to pause the transfer, kill the server.
 
 ### Development Status
 
-File transfer working, but not useful for the above purpose yet.
+Appears to be working as intended after some basic testing.
 
 
 ### Building
 
 Depends on nanomsg, get this and install.
+
 Change the include directory in the makefile as needed.
+
 make
 
 ### Authors

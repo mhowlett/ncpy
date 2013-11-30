@@ -43,13 +43,43 @@ int recv_cmd_int(int socket, char command, int* data)
     printf("network error: receiving command type %d", command);
     return -1;
   }
+  *data = *((int *)(buf+1));
 
   return 0;
 }
 
-int recv_cmd_chunk(int socket, char** data)
+int recv_cmd_chunk(int socket, int i, char* data)
 {
-  
+  const int headerlen = COMMAND_ID_SIZE + sizeof(int);
+  const int buflen = CHUNK_SIZE + headerlen;
+  char buf[buflen];
+  int rc;
+
+  rc = nn_recv(socket, buf, buflen, 0);
+  if (rc < 0)
+  {
+    printf("network error\n");
+    return -1;
+  }
+  int receivedlen = rc;
+
+  if (buf[0] != COMMAND_GETCHUNK)
+  {
+    printf("network error: receiving chunk #%d", i);
+    return -1;
+  }
+
+  int goti = *((int *)(buf+1));
+  if (goti != i)
+  {
+    printf("network error: unexpected chunk. got %d. expected %d.", goti, i);
+    return -1;
+  }
+
+  int chunklen = receivedlen - headerlen;
+  memcpy(data, buf + headerlen, chunklen);
+
+  return chunklen;
 }
 
 int get_filename_and_numchunks(int socket, char** filename, int* maxchunk)
@@ -81,6 +111,8 @@ int execute_client(char* a)
   int maxchunk;
   get_filename_and_numchunks(socket, &filename, &maxchunk);
 
+  printf("%d\n", maxchunk);
+
   int bufsize = CHUNK_SIZE*(maxchunk+1);
   char *data = (char *)malloc(bufsize);
 
@@ -96,13 +128,7 @@ int execute_client(char* a)
     fflush(stdout);
 
     send_cmd(socket, COMMAND_GETCHUNK, i);
-
-    rc = nn_recv(socket, chunkbuf, CHUNK_SIZE, 0);
-    if (rc < 0)
-    {
-      printf("network error\n");
-      break;
-    }
+    rc = recv_cmd_chunk(socket, i, chunkbuf);
 
     memcpy(data + CHUNK_SIZE*i, chunkbuf, rc);
   }

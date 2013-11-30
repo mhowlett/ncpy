@@ -71,12 +71,22 @@ int execute_server(int port, char* path)
 
     if (cmdbuf[0] == COMMAND_GETCHUNK)
     {
+      const int headerlen = sizeof(int) + COMMAND_ID_SIZE;
       int id = *((int *)(cmdbuf+1));
       int chunklen = (id == size/CHUNK_SIZE) ? size % CHUNK_SIZE : CHUNK_SIZE;
+      char* sendbuf = (char *)malloc(chunklen + headerlen);
+
+      sendbuf[0] = COMMAND_GETCHUNK;
+      memcpy(sendbuf + COMMAND_ID_SIZE, &id, sizeof(int));
+      memcpy(sendbuf+headerlen, data + id*CHUNK_SIZE, chunklen);
+
       erase_line();
       printf("sending chunk: %d/%d", id+1, maxchunk+1);
       fflush(stdout);
-      nn_send(socket, data + id * CHUNK_SIZE, chunklen, 0);
+
+      nn_send(socket, sendbuf, chunklen + headerlen, 0);
+      free(sendbuf);
+
       continue;
     }
 

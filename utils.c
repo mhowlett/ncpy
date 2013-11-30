@@ -2,5 +2,5 @@
 
 void erase_line()
 {
-  printf("\r                                                              ");
+  printf("\r                                                              \r");
 }

@@ -44,6 +44,9 @@ If you want to pause the transfer, kill the server.
 
 Appears to be working as intended after some basic testing.
 
+Currently loads entire file to send into memory on server startup, which is a bit
+limiting on low memory VPSs. Will be chaning shortly.
+
 
 ### Building
 

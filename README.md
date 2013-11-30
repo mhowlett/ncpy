@@ -1,13 +1,14 @@
 # ncpy
 
-This is a small utility for copying large files from one computer to another in situations where 
+This is a utility for copying large files from one computer to another in situations where 
 network connectivity is potentially very poor. It is fast. It doesn't use encryption. It doesn't
 matter if the network connection changes mid-transfer.
 
 I built this because I frequently need to transfer large data files from a server to my laptop and
 and frequently want to do this whilst working in cafes in developing contries with very unreliable
-internet connections. If the network connection goes bad (as it usually does), I need to be able to
-move to a different cafe and have the transfer seemlessly continue from where it left off.
+internet connections. If the network connection goes bad or slow or I suddently want to leave
+because someone started talking loudly or something, I want to be able to move to a different
+cafe and have the transfer seemlessly continue from where it left off.
 
 
 ### Usage
@@ -25,7 +26,7 @@ ncpy uses port 9005. This is currently not configurable.
 In order to prevent a transfer aborting, the only thing that must be done is to
 ensure the client is not terminated.
 
-It is ok to put a latop running the client to sleep. Evreything will continue as 
+It is ok to put a latop running the client to sleep. Everything will continue as 
 normal when the laptop is woken up and regains network access.
 
 It is ok to run the server in a shell, which could potentially hang if the connection

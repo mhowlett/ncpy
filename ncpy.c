@@ -2,23 +2,23 @@
 #include <reqrep.h>
 #include <stdio.h>
 
+// todo: allow chunk size and port to be specified on comand line.
+#define CHUNK_SIZE 65536
+#define PORT 9005
+
 #define COMMAND_FINISHED 0
 #define COMMAND_GETCHUNK 1
 #define COMMAND_GETMAXCHUNK 2
 #define COMMAND_FILENAME 3
 
-#define CHUNK_SIZE 128
-
-#define PORT "9005"
-
-int readfile(const char *filename, char **result) 
+int readfile(const char *path, char **result) 
 { 
   int size = 0;
-  FILE *f = fopen(filename, "rb");
+  FILE *f = fopen(path, "rb");
   if (f == NULL) 
   { 
     *result = NULL;
-    printf("unable to open file %s\n", filename);
+    printf("unable to open file '%s'\n", path);
     return -1;
   } 
   fseek(f, 0, SEEK_END);
@@ -28,7 +28,7 @@ int readfile(const char *filename, char **result)
   if (size != fread(*result, sizeof(char), size, f)) 
   { 
     free(*result);
-    printf("unable to read file %s\n", filename);
+    printf("unable to read file '%s'\n", path);
     return -2;
   } 
   fclose(f);
@@ -36,19 +36,18 @@ int readfile(const char *filename, char **result)
   return size;
 }
 
-int writefile(const char *filename, char *bytes, int size)
+int writefile(const char *path, char *bytes, int size)
 {
-  FILE *f = fopen(filename, "wb");
+  FILE *f = fopen(path, "wb");
   int fd = fileno(f);
 
   if (f == NULL)
   {
-    printf("unable to open file %s for write.\n", filename);
+    printf("unable to open file '%s' for writing.\n", path);
     return -1;
   }
 
   int num = write(fd, bytes, size);
-  printf( "wrote %d bytes\n", num);
 
   fclose(f);
 
@@ -57,80 +56,91 @@ int writefile(const char *filename, char *bytes, int size)
 
 int execute_client(char* a)
 {
-  char addr[1024];
-  char buf[CHUNK_SIZE];
   int socket;
   int endpoint;
-  sprintf(addr, "tcp://%s:%s", a, PORT);
+  int rc;
+
+  char* filename;
+
+  char addr[1024];
+  char commandbuf[sizeof(int) + 1];
+  char chunkbuf[CHUNK_SIZE];
+
+  sprintf(addr, "tcp://%s:%d", a, PORT);
 
   socket = nn_socket(AF_SP, NN_REQ);
   endpoint = nn_connect(socket, addr);
 
-  buf[0] = COMMAND_FILENAME;
-  nn_send(socket, buf, sizeof(int) + 1, 0);
-  
+  commandbuf[0] = COMMAND_FILENAME;
+  nn_send(socket, commandbuf, sizeof(int) + 1, 0);
+  rc = nn_recv(socket, &filename, NN_MSG, 0);
 
-  buf[0] = COMMAND_GETMAXCHUNK;
-  nn_send(socket, buf, sizeof(int) + 1, 0);
-  int rc = nn_recv(socket, buf, CHUNK_SIZE, 0);
+  commandbuf[0] = COMMAND_GETMAXCHUNK;
+  nn_send(socket, commandbuf, sizeof(int) + 1, 0);
+  rc = nn_recv(socket, commandbuf, CHUNK_SIZE, 0);
   
-  int maxchunk = *((int *)buf);
+  int maxchunk = *((int *)commandbuf);
   int bufsize = CHUNK_SIZE*(maxchunk+1);
-  char *bytes = (char *)malloc(bufsize);
+  char *data = (char *)malloc(bufsize);
 
-  printf ("%d\n", maxchunk);
+  printf ("chunks to get: %d\n", maxchunk);
 
   int i;
   for (i =0; i<=maxchunk; ++i)
   {
     printf("getting chunk #%d\n", i);
 
-    buf[0] = COMMAND_GETCHUNK;
-    *((int *)(buf+1)) = i;
+    commandbuf[0] = COMMAND_GETCHUNK;
+    *((int *)(commandbuf+1)) = i;
+    nn_send(socket, commandbuf, sizeof(int) + 1, 0);
 
-    nn_send(socket, buf, sizeof(int) + 1, 0);
-
-    rc = nn_recv(socket, buf, CHUNK_SIZE, 0);
+    rc = nn_recv(socket, chunkbuf, CHUNK_SIZE, 0);
     if (rc < 0)
     {
       printf("network error\n");
       break;
     }
 
-    memcpy(bytes + CHUNK_SIZE*i, buf, rc);
+    memcpy(data + CHUNK_SIZE*i, chunkbuf, rc);
   }
 
-  buf[0] = COMMAND_FINISHED;
-  nn_send(socket, buf, sizeof(int) + 1, 0);
+  commandbuf[0] = COMMAND_FINISHED;
+  nn_send(socket, commandbuf, sizeof(int) + 1, 0);
 
   int size = rc + maxchunk*CHUNK_SIZE;
-  return writefile("out.bin", bytes, size);
+  rc = writefile(filename, data, size);
+
+  nn_freemsg(filename);
+
+  return rc;
 }
 
-int execute_server(char* port, char* path)
+int execute_server(int port, char* path)
 {
-  char buf[1024];
-  char addr[1024];
+  int rc;
   int socket;
   int endpoint;
 
-  char* bytes;
-  int size =readfile(path, &bytes);
+  char cmdbuf[5];
+  char addr[1024];
+
+  char* data;
+  int size = readfile(path, &data);
   if (size < 0)
   {
     return 1;
   }
-  printf("filee #bytes: %d\n", size);
 
+  printf("file #bytes: %d\n", size);
+
+  sprintf(addr, "tcp://*:%d", port);
   socket = nn_socket(AF_SP, NN_REP);
-
-  sprintf(addr, "tcp://*:%s", port);
   endpoint = nn_bind(socket, addr);
 
   int idlecnt = 0;
   while (idlecnt < 10000)
   {
-    int rc =  nn_recv(socket, buf, 1024, NN_DONTWAIT);
+    rc =  nn_recv(socket, cmdbuf, 5, NN_DONTWAIT);
 
     if (rc <= 0)
     {
@@ -142,28 +152,35 @@ int execute_server(char* port, char* path)
 
     if (rc != 5)
     {
-      printf("network error (1)\n");
+      printf("netwok error: incorrect command length.\n");
+      break;
     }
     
-    if (buf[0] == COMMAND_FINISHED)
+    if (cmdbuf[0] == COMMAND_FINISHED)
     {
-      printf("finished\n");
+      printf("transfer completed.\n");
       break;
     }
 
-    if (buf[0] == COMMAND_GETMAXCHUNK)
+    if (cmdbuf[0] == COMMAND_FILENAME)
     {
-      *((int *)buf) = size / CHUNK_SIZE + ((size % CHUNK_SIZE == 0) ? -1 : 0);
-      nn_send(socket, buf, sizeof(int), 0);
+      nn_send(socket, path, strlen(path)+1, 0);
       continue;
     }
 
-    if (buf[0] == COMMAND_GETCHUNK)
+    if (cmdbuf[0] == COMMAND_GETMAXCHUNK)
     {
-      int id = *((int *)(buf+1));
+      *((int *)cmdbuf) = size/CHUNK_SIZE + ((size % CHUNK_SIZE == 0) ? -1 : 0);
+      nn_send(socket, cmdbuf, sizeof(int), 0);
+      continue;
+    }
+
+    if (cmdbuf[0] == COMMAND_GETCHUNK)
+    {
+      int id = *((int *)(cmdbuf+1));
       int len = (id == size / CHUNK_SIZE) ? size % CHUNK_SIZE : CHUNK_SIZE;
       printf("%d : %d\n", id, len);
-      nn_send(socket, bytes + id * CHUNK_SIZE, len, 0);
+      nn_send(socket, data + id * CHUNK_SIZE, len, 0);
       continue;
     }
 
@@ -176,7 +193,7 @@ int execute_server(char* port, char* path)
     printf("idle too long, giving up.\n");
   }
 
-  free(bytes);
+  free(data);
   return 0;
 }
 

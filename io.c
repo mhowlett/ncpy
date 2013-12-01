@@ -34,7 +34,6 @@ int readchunk(const char *path, char **result, int chunknum)
   return toread;
 }
 
-
 int filesize(const char *path)
 {
   int size = 0;
@@ -47,32 +46,6 @@ int filesize(const char *path)
   fseek(f, 0, SEEK_END);
   size = ftell(f);
   fclose(f);
-  return size;
-}
-
-
-int readfile(const char *path, char **result) 
-{ 
-  int size = 0;
-  FILE *f = fopen(path, "rb");
-  if (f == NULL) 
-  { 
-    *result = NULL;
-    printf("unable to open file '%s'\n", path);
-    return -1;
-  } 
-  fseek(f, 0, SEEK_END);
-  size = ftell(f);
-  fseek(f, 0, SEEK_SET);
-  *result = (char *)malloc(size+1);
-  if (size != fread(*result, sizeof(char), size, f)) 
-  { 
-    free(*result);
-    printf("unable to read file '%s'\n", path);
-    return -2;
-  } 
-  fclose(f);
-  (*result)[size] = 0;
   return size;
 }
 

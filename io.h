@@ -3,7 +3,6 @@
 
 int filesize(const char *path);
 int readchunk(const char *path, char **result, int chunknum);
-int readfile(const char *path, char **result);
 int writefile(const char *path, char *bytes, int size);
 
 #endif

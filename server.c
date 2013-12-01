@@ -12,10 +12,12 @@ int execute_server(int port, char* path)
   char addr[1024];
 
   int maxchunk;
+
   char* data;
-  int size = readfile(path, &data);
-  if (size < 0) return 1;
-  maxchunk = size/CHUNK_SIZE + ((size % CHUNK_SIZE == 0) ? -1 : 0);
+  int fsize = filesize(path);
+
+  if (fsize < 0) return 1;
+  maxchunk = fsize/CHUNK_SIZE + ((fsize % CHUNK_SIZE == 0) ? -1 : 0);
 
   sprintf(addr, "tcp://*:%d", port);
 
@@ -73,12 +75,13 @@ int execute_server(int port, char* path)
     {
       const int headerlen = sizeof(int) + COMMAND_ID_SIZE;
       int id = *((int *)(cmdbuf+1));
-      int chunklen = (id == size/CHUNK_SIZE) ? size % CHUNK_SIZE : CHUNK_SIZE;
+      int chunklen = (id==fsize/CHUNK_SIZE) ? fsize % CHUNK_SIZE : CHUNK_SIZE;
       char* sendbuf = (char *)malloc(chunklen + headerlen);
 
       sendbuf[0] = COMMAND_GETCHUNK;
-      memcpy(sendbuf + COMMAND_ID_SIZE, &id, sizeof(int));
-      memcpy(sendbuf+headerlen, data + id*CHUNK_SIZE, chunklen);
+      memcpy(sendbuf + COMMAND_ID_SIZE, &id, sizeof(int)); 
+      readchunk(path, &data, id); 
+      memcpy(sendbuf+headerlen, data, chunklen);
 
       erase_line();
       printf("sending chunk: %d/%d", id+1, maxchunk+1);

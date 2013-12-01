@@ -1,6 +1,6 @@
 # ncpy
 
-This is a utility for copying large files from one computer to another in situations where 
+ncpy is a utility for copying large files from one computer to another in situations where 
 network connectivity is potentially very poor. 
 
 I built this because I frequently need to transfer large data files from a server to my laptop and

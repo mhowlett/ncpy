@@ -24,7 +24,7 @@ ADDRESS-TO-RECEIVE-FROM is either an IP address or fully qualified domain name.
 
 ncpy uses port 9005. This is currently not configurable. 
 
-In order to prevent a transfer aborting, the only thing that must be done is to
+In order to prevent a transfer aborting, the only thing that must be done is
 ensure the client is not terminated.
 
 It is ok to put a latop running the client to sleep. Everything will continue as 

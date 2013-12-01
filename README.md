@@ -20,7 +20,9 @@ On the server
 On the client:
 
     ncpy -r ADDRESS-TO-RECEIVE-FROM
-    
+
+ADDRESS-TO-RECEIVE-FROM is either an IP address or fully qualified domain name.
+
 ncpy uses port 9005. This is currently not configurable. 
 
 In order to prevent a transfer aborting, the only thing that must be done is to

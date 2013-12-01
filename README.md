@@ -6,7 +6,7 @@ transfer large data files from a server to my laptop and
 frequently want to do this whilst working in cafes in developing contries with very unreliable
 internet connections. If the network connection goes bad or slow or I suddenly want to leave
 because someone started talking loudly, I want to be able to move to a different
-cafe and have the transfer seemlessly continue from where it left off.
+cafe or go home and have the transfer seemlessly continue from where it left off.
 
 
 ### Usage

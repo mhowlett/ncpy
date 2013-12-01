@@ -7,6 +7,8 @@ int execute_server(int port, char* path)
   int socket;
   int endpoint;
 
+  char* filename;
+
   char cmdbuf[sizeof(int) + COMMAND_ID_SIZE];
   char chunkbuf[CHUNK_SIZE + COMMAND_ID_SIZE];
   char addr[1024];
@@ -20,6 +22,8 @@ int execute_server(int port, char* path)
   maxchunk = fsize/CHUNK_SIZE + ((fsize % CHUNK_SIZE == 0) ? -1 : 0);
 
   sprintf(addr, "tcp://*:%d", port);
+
+  filename = basename(path);
 
   int timeout_ms = 10000;
   socket = nn_socket(AF_SP, NN_REP);
@@ -54,10 +58,10 @@ int execute_server(int port, char* path)
 
     if (cmdbuf[0] == COMMAND_FILENAME)
     {
-      int bufsize = strlen(path) + COMMAND_ID_SIZE + 1;
+      int bufsize = strlen(filename) + COMMAND_ID_SIZE + 1;
       char* tmpbuf = malloc(bufsize);
       tmpbuf[0] = COMMAND_FILENAME;
-      strcpy(tmpbuf + COMMAND_ID_SIZE, path);
+      strcpy(tmpbuf + COMMAND_ID_SIZE, filename);
       nn_send(socket, tmpbuf, bufsize, 0);
       free(tmpbuf);
       continue;

@@ -49,9 +49,9 @@ Appears to be working as intended after some basic testing.
 ### Building
 
 I've included a Vagrantfile which can be used to create an environment suitable for
-building and running ncpy using [vagrant][http://www.vagrantup.com/]
+building and running ncpy using [vagrant](http://www.vagrantup.com/)
 
-ncpy depends on [nanomsg][http://nanomsg.org/]. Have a look at bootstrap.sh (which 
+ncpy depends on [nanomsg](http://nanomsg.org/). Have a look at bootstrap.sh (which 
 defines provisioning for Vagrantfile) for steps on how to install this.
 
 You may need to edit the Makefile to change the nanomsg include path as required.

@@ -1,7 +1,7 @@
 # ncpy
 
 This is a utility for copying large files from one computer to another in situations where 
-network connectivity is potentially very poor. It is fast. It doesn't use encryption. There
+network connectivity is potentially very poor. It is fast. There
 is no problem if you need to change network connections mid-transfer.
 
 I built this because I frequently need to transfer large data files from a server to my laptop and

@@ -1,3 +1,4 @@
+
 #include "client.h"
 #include "utils.h"
 
@@ -146,14 +147,11 @@ int execute_client(char* a)
 
     if (rc > 0)
     {
-      memcpy(data + CHUNK_SIZE*i, chunkbuf, rc);
+      appendtofile(filename, chunkbuf, rc);
     }
   }
 
   send_cmd(socket, COMMAND_FINISHED, 0);
-
-  int size = rc + maxchunk*CHUNK_SIZE;
-  rc = writefile(filename, data, size);
 
   erase_line();
   printf ("%s: receive complete\n", filename);

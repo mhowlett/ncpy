@@ -49,9 +49,9 @@ int filesize(const char *path)
   return size;
 }
 
-int writefile(const char *path, char *bytes, int size)
+int appendtofile(const char *path, char *bytes, int size)
 {
-  FILE *f = fopen(path, "wb");
+  FILE *f = fopen(path, "ab");
   int fd = fileno(f);
 
   if (f == NULL)

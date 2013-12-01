@@ -29,7 +29,7 @@ ensure the client is not terminated.
 It is ok to put a latop running the client to sleep. Everything will continue as 
 normal when the laptop is woken up and regains network access.
 
-It is ok to run the server in a shell, which could potentially hang if the connection
+It is ok to run the server in a shell which could potentially hang if the connection
 is lost. Simply start the server up again if it dies in this way. No need to use
 virtual terminal manager such as screen.
 
@@ -37,7 +37,8 @@ The server will automatically shut down if it has been idle for too long. If thi
 happens and you still want to continue the transfer, simply start the server up
 again. Note however that the file must not have changed between server restarts.
 
-If you want to pause the transfer, kill the server.
+If you want to pause the transfer, you can kill the server and restart it when you
+want to resume.
 
 
 ### Development Status

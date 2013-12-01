@@ -1,8 +1,9 @@
 # ncpy
 
 This is a utility for copying large files from one computer to another in situations where 
-network connectivity is potentially very poor. I built this because I frequently need to 
-transfer large data files from a server to my laptop and
+network connectivity is potentially very poor. 
+
+I built this because I frequently need to transfer large data files from a server to my laptop and
 frequently want to do this whilst working in cafes in developing contries with very unreliable
 internet connections. If the network connection goes bad or slow or I suddenly want to leave
 because someone started talking loudly, I want to be able to move to a different

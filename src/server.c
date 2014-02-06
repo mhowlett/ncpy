@@ -26,6 +26,7 @@
 
 int execute_server(int port, char* path)
 {
+  int i;
   int rc;
   int socket;
   int endpoint;
@@ -46,7 +47,13 @@ int execute_server(int port, char* path)
 
   sprintf(addr, "tcp://*:%d", port);
 
+  // for some reason basepath isn't working. quick fix...
   filename = basename(path);
+  int pathlen = strlen(path);
+  for (i=pathlen-1; i>=0; --i)
+  {
+    if (path[i] == '/') { filename = &path[i+1]; break; }
+  }
 
   int timeout_ms = 10000;
   socket = nn_socket(AF_SP, NN_REP);

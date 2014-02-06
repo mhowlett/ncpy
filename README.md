@@ -1,8 +1,9 @@
 # ncpy
 
-This is a utility for copying large files from one computer to another in situations where 
-network connectivity is potentially very poor. I built this because I frequently need to 
-transfer large data files from a server to my laptop and
+ncpy is a utility for copying large files from one computer to another in situations where 
+network connectivity is potentially very poor. 
+
+I built this because I frequently need to transfer large data files from a server to my laptop and
 frequently want to do this whilst working in cafes in developing contries with very unreliable
 internet connections. If the network connection goes bad or slow or I suddenly want to leave
 because someone started talking loudly, I want to be able to move to a different
@@ -23,7 +24,7 @@ ADDRESS-TO-RECEIVE-FROM is either an IP address or fully qualified domain name.
 
 ncpy uses port 9005. This is currently not configurable. 
 
-In order to prevent a transfer aborting, the only thing that must be done is to
+In order to prevent a transfer aborting, the only thing that must be done is
 ensure the client is not terminated.
 
 It is ok to put a latop running the client to sleep. Everything will continue as 
@@ -48,11 +49,17 @@ Appears to be working as intended after some basic testing.
 
 ### Building
 
-Depends on nanomsg, get this and install.
+I've included a Vagrantfile which can be used to create an environment suitable for
+building and running ncpy using [vagrant](http://www.vagrantup.com/)
 
-Change the include directory in the makefile as needed.
+ncpy depends on [nanomsg](http://nanomsg.org/). Have a look at bootstrap.sh (which 
+defines provisioning for Vagrantfile) for steps on how to install this.
 
-make
+You may need to edit the Makefile to change the nanomsg include path as required.
+
+I've not compiled this under windows yet, but it should be possible without modifying
+the source.
+
 
 ### Authors
 

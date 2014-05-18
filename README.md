@@ -1,6 +1,6 @@
 # ncpy
 
-ncpy is a utility for copying large files from one computer to another in situations where 
+ncpy is a small utility for copying large files from one computer to another in situations where 
 network connectivity is potentially very poor. 
 
 I built this because I frequently need to transfer large data files from a server to my laptop and
@@ -9,6 +9,8 @@ internet connections. If the network connection goes bad or slow or I suddenly w
 because someone started talking loudly, I want to be able to move to a different
 cafe or go home and have the transfer seemlessly continue from where it left off.
 
+Update: An alternate and not very difficult way to solve this problem is to use a webserver on the 
+server and a download manager like DownloadThemAll! in a web browser. 
 
 ### Usage
 

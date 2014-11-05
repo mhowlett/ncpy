@@ -62,4 +62,4 @@ the source.
 
 ### Authors
 
-[Matt Howlett](http://www.matthowlett.com)
+[Matt Howlett](https://www.matthowlett.com)
